@@ -1,0 +1,142 @@
+Sub VBA_HW_MYSD()
+
+Dim ws As Worksheet
+
+
+For Each ws In Worksheets
+    ws.Activate
+    
+
+    'Resets the names, volumes, and summary_table to begin on row 2
+    Dim ticker_name As String
+    Dim volume_total As Double
+    volume_total = 0
+    Dim summary_table_row As Double
+    Dim open_table_row As Double
+    summary_table_row = 2
+    open_table_row = 2
+    lastrow = Cells(Rows.Count, 1).End(xlUp).Row
+    Dim close_value As Double
+    Dim open_value As Double
+    Dim yearly_change As Double
+    
+    
+    Range("I1").Value = "Ticker"
+    Range("J1").Value = "Yearly Change"
+    Range("K1").Value = "Percent Change"
+    Range("L1").Value = "Total Volume"
+    
+   'Tests to see if the current row matches the next row, if not then...
+    For I = 2 To lastrow
+    
+        
+        
+           If Cells(I - 1, 1).Value <> Cells(I, 1).Value Then
+               open_value = Cells(I, 3).Value
+               Range("N" & open_table_row).Value = open_value
+               open_table_row = open_table_row + 1
+           
+           End If
+           
+           If Cells(I + 1, 1).Value <> Cells(I, 1).Value Then
+        'sets the stock name
+               ticker_name = Cells(I, 1).Value
+       'Add to the stock volume total
+               volume_total = volume_total + Cells(I, 7).Value
+       'Creates the opening value
+       'will need to be changed to 6 on the complete data set; this one is missing the closing data
+               close_value = Cells(I, 6).Value
+       'Prints the stock name to the summary table
+               Range("I" & summary_table_row).Value = ticker_name
+       'Prints the volume total amount to the summary table
+               Range("L" & summary_table_row).Value = volume_total
+       'Prints closing value to summary table
+               Range("O" & summary_table_row).Value = close_value
+       'Prints yearly change to summary table
+               yearly_change = (close_value - open_value)
+               Range("J" & summary_table_row).Value = yearly_change
+                   If yearly_change >= 0 Then
+                       Range("J" & summary_table_row).Interior.ColorIndex = 4
+                   Else
+                       Range("J" & summary_table_row).Interior.ColorIndex = 3
+                   
+                   End If
+                   
+               
+       'Prints percent change to summary table
+                  If open_value > 0 And close_value > 0 Then
+                     Range("K" & summary_table_row).Value = ((close_value - open_value) / open_value)
+               
+                  'Add one to the summary row table, so it doesn't go over itself
+               summary_table_row = summary_table_row + 1
+       'Resets brand total
+               volume_total = 0
+               close_value = 0
+               open_value = 0
+           
+       
+       'If they do match, add to the existing brand total
+               
+               Else
+               volume_total = volume_total + Cells(I, 7).Value
+                  
+                  End If
+                  
+               End If
+
+       
+       'To test the next row
+       Next I
+       
+    'clears the columns N and O 
+    Range("N:N").ClearContents
+    Range("O:O").ClearContents
+    
+  
+    'Finds the maxiumum value, and matches it to the row and then the ticker name	
+    Range("N2").Value = "Greatest % Increase"
+    Dim maxval As Double
+    maxval = Application.Max(Range("K:K"))
+    Range("P2").Value = maxval
+    'MsgBox (maxval)
+    Dim maxvalrow As Double
+    Dim maxvalname As String
+    maxvalrow = Application.Match(maxval, Range("K:K"), 0)
+    maxvalname = Cells(maxvalrow, "I").Value
+    Range("O2").Value = maxvalname
+
+    'Finds the minimum value, and matches it to the row and then the ticker name
+    Range("N3").Value = "Greatest % Decrease"
+    Dim minval As Double
+    Dim minvalrow As Double
+    Dim minvalname As String
+    minval = WorksheetFunction.Min(Range("K:K"))
+    minvalrow = Application.Match(minval, Range("K:K"), 0)
+    minvalname = Cells(minvalrow, "I").Value
+    Range("O3").Value = minvalname
+    Range("P3").Value = minval
+
+    'Finds the max total stock volume, and matches it to the row and then the ticker name    
+    Dim totalval As Double
+    Dim totalvalrow As Double
+    Dim totalvalname As String
+    
+    Range("N4").Value = "Greatest Total Volume"
+    totalval = WorksheetFunction.Max(Range("L:L"))
+    totalvalrow = Application.Match(totalval, Range("L:L"), 0)
+    totalvalname = Cells(totalvalrow, "I").Value
+    Range("O4").Value = totalvalname
+    Range("P4").Value = totalval
+    
+    Range("O1").Value = "Ticker Name"
+    Range("P1").Value = "Value"
+    
+
+    
+ Next ws
+ 
+summary_table_row = 2
+
+
+
+End Sub
